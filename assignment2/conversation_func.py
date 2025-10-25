@@ -93,12 +93,13 @@ def conversation_to_features(
         attention = [1]*len(full_ids)
 
         for i, message in enumerate(messages):
-            if message["role"] != "assistant":
-                continue
-            else:
+            if message["role"] == "assistant":
                 start = prefix_lengths[i-1] if i>0 else 0
                 end = prefix_lengths[i]
                 labels[start:end] = full_ids[start:end]
+                break
+            else:
+                continue
     else:
         # ------------------------------------------------------------------
         # Exercise 2: Multi-turn loss mask
@@ -121,7 +122,16 @@ def conversation_to_features(
         #   - The code that follows assumes `labels` already reflect your
         #     masking decisions.
         #
-        raise NotImplementedError("Exercise 2: extend the loss mask to multi-turn conversations.")
+        labels = [IGNORE_TOKEN_ID]*len(full_ids)
+        attention = [1]*len(full_ids)
+
+        for i, message in enumerate(messages):
+            if message["role"] != "assistant":
+                continue
+            else:
+                start = prefix_lengths[i-1] if i>0 else 0
+                end = min(prefix_lengths[i],len(full_ids))
+                labels[start:end] = full_ids[start:end]
 
     if len(full_ids) > max_length:
         if truncation == "left":
