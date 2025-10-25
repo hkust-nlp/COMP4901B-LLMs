@@ -1,6 +1,6 @@
 # COMP4901B Homework 2 — Supervised Fine-Tuning (SFT) for Language Models
 
-**<span style="color: red;">Due Date: Nov 5, 2025, 11:59 PM</span>**
+**Due Date: Nov 5, 2025, 11:59 PM**
 
 **Full score: 100 points.**
 
@@ -46,7 +46,7 @@ Honor code violation will directly cause failing the course.
 - It also downloads the SmolLM2-135M model and the smol-smoltalk-6k dataset (a 6000-sample subset of the original smol-smoltalk dataset).
 - In case you use Google colab or other machines, you can follow similar instructions.
 
-### 1. (15 Points) Part 1 — Single-turn Loss Masking
+### 1. (5 Points) Part 1 — Single-turn Loss Masking
 
 Implement the single-turn conversation loss masking logic in `conversation_func.py`.
 
@@ -66,7 +66,7 @@ Implement the single-turn conversation loss masking logic in `conversation_func.
 - A screenshot or console output showing that your single-turn implementation passed validation.
 - Brief explanation of your loss masking logic.
 
-### 2. (15 Points) Part 2 — Multi-turn Loss Masking
+### 2. (5 Points) Part 2 — Multi-turn Loss Masking
 
 Extend your implementation to support multi-turn conversations in `conversation_func.py`.
 
@@ -85,7 +85,56 @@ Extend your implementation to support multi-turn conversations in `conversation_
 - A screenshot showing that your multi-turn implementation passed validation.
 - Explanation of how you extended the single-turn logic to handle multiple turns.
 
-### 3. (15 Points) Part 3 — Implementing Cross-Entropy Loss
+### 3. (5 Points) Part 3 — Reverse Loss Masking (Single-turn with Message Reordering)
+
+Implement the reverse loss masking logic in `reverse_conversation_func.py` for single-turn conversations.
+
+**Task Details:**
+- Complete the TODO in the `reverse_conversation_to_features()` function for single-turn conversations (Exercise 3).
+- **Key Mechanism**: The function **automatically reorders the messages** - putting the assistant message first and user message second:
+  - Original: `[user: "..."] [assistant: "..."]`
+  - After reordering: `[assistant: "..."] [user: "..."]`
+  - Note: The messages are reordered, but their roles and content remain unchanged!
+- **Goal:** After reordering, mask the assistant message (now in position 1) and keep the user message (now in position 2) for loss calculation.
+- A single-turn conversation consists of (optionally) one system message, one user message, and one assistant message.
+- Use `full_ids` (the complete tokenized conversation) and `prefix_lengths` (cumulative token counts per message) to identify message spans.
+- After reordering, find the "user" role span (now in position 2) and copy those tokens to `labels`, while keeping all other positions as `IGNORE_TOKEN_ID = -100`.
+- Set `attention_mask` to be a list of 1s for all valid tokens (before padding).
+
+**Validation:**
+- Run `bash scripts/check_exercises_3.sh` (or `python reverse_conversation_func.py`) to validate your implementation against golden answers.
+- The script will report whether your implementation matches the expected output.
+
+**Report (paste into the PDF):**
+- A screenshot or console output showing that your implementation passed validation.
+- Brief explanation of your implementation approach.
+- **Conceptual Question**: After training a model with this masking approach (where assistant messages are masked and user messages contribute to loss), what would the model's behavior be? What might this training strategy be useful for? Provide at least one specific real-world application scenario.
+
+### 4. (5 Points) Part 4 — Reverse Loss Masking (Multi-turn)
+
+Extend your reverse loss masking implementation to support multi-turn conversations in `reverse_conversation_func.py`.
+
+**Task Details:**
+- Complete the TODO for multi-turn conversations (Exercise 4).
+- **Key Mechanism**: The function **does NOT reorder messages** for multi-turn. Instead, it **automatically adds a system message** if not present:
+  - Original: `[user: ...] [assistant: ...] [user: ...] [assistant: ...]`
+  - After preprocessing: `[system: "You are a good state predictor."] [user: ...] [assistant: ...] [user: ...] [assistant: ...]`
+- **Goal:** Mask all assistant and system tokens with `IGNORE_TOKEN_ID`, and only keep **user tokens** for loss calculation.
+- Multi-turn conversations contain multiple (user, assistant) pairs, potentially preceded by system messages.
+- The added system message provides context for the first user turn.
+- Handle truncation: when conversations exceed `max_length`, `prefix_lengths` may overshoot `len(full_ids)`. Use `min()` to stay in bounds.
+- Iterate through all messages and identify which spans correspond to user utterances.
+
+**Validation:**
+- Run `bash scripts/check_exercises_4.sh` (or `python reverse_conversation_func.py --multi-turn`) to validate.
+- Ensure your implementation handles conversations with arbitrary numbers of turns.
+
+**Report (paste into the PDF):**
+- A screenshot showing that your multi-turn reverse masking implementation passed validation.
+- Explanation of how you extended the single-turn reverse logic to handle multiple user turns in a conversation.
+- **Conceptual Question**: After training with this masking strategy (where only user messages contribute to loss in a multi-turn conversation), what would the model learn? In what real-world scenarios might this training approach be useful? Provide at least 1 specific examples and explain the value of such a model.
+
+### 5. (20 Points) Part 5 — Implementing Cross-Entropy Loss
 
 Implement the token-level cross-entropy loss function in `loss_functions.py`.
 
@@ -163,7 +212,7 @@ The checker will test your implementation on several test cases with known refer
 - Brief explanation of how you computed the loss (formula and key steps).
 - Explanation of what `num_items_in_batch` represents and why it's necessary.
 
-### 4. (20 Points) Part 4 — Supervised Fine-Tuning
+### 6. (25 Points) Part 6 — Supervised Fine-Tuning
 
 Perform supervised fine-tuning on the SmolLM2-135M model using the provided training script.
 
@@ -195,7 +244,7 @@ bash scripts/sft.sh
 - Final checkpoint path.
 - **Answer the question:** What is the role of `tokenizer.apply_chat_template()` in the training pipeline? How does it format conversations?
 
-### 5. (35 Points) Part 5 — Instruction-Following Evaluation & Hyperparameter Tuning
+### 7. (35 Points) Part 7 — Instruction-Following Evaluation & Hyperparameter Tuning
 
 Evaluate both the base model and your fine-tuned model using the IFEval benchmark, which tests instruction-following capabilities.
 
@@ -374,25 +423,35 @@ If you encounter CUDA out-of-memory errors:
 
 Submit a zip of the codebase (only the homework directory) and a PDF report to Canvas. Your PDF should include your full name, student ID, and your UST email.
 
-### Part 1: Single-turn Loss Masking (15 points)
+### Part 1: Single-turn Loss Masking (5 points)
 - Screenshot showing validation passed
 - Brief explanation of your implementation logic
 
-### Part 2: Multi-turn Loss Masking (15 points)
+### Part 2: Multi-turn Loss Masking (5 points)
 - Screenshot showing validation passed
 - Explanation of how you extended the single-turn logic
 
-### Part 3: Cross-Entropy Loss Implementation (15 points)
+### Part 3: Reverse Loss Masking - Single-turn (5 points)
+- Screenshot showing validation passed
+- Brief explanation of your implementation approach
+- **Conceptual Question**: After training a model with this masking approach (where assistant messages are masked and user messages contribute to loss), what would the model's behavior be? What might this training strategy be useful for? Provide at least one specific real-world application scenario.
+
+### Part 4: Reverse Loss Masking - Multi-turn (5 points)
+- Screenshot showing validation passed
+- Explanation of how you extended the single-turn reverse logic to handle multiple user turns in a conversation
+- **Conceptual Question**: After training with this masking strategy (where only user messages contribute to loss in a multi-turn conversation), what would the model learn? In what real-world scenarios might this training approach be useful? Provide at least 2 specific examples and explain the value of such a model.
+
+### Part 5: Cross-Entropy Loss Implementation (20 points)
 - Screenshot showing all test cases passed
 - Explanation of your loss computation (formula and steps)
 - Explanation of what `num_items_in_batch` represents and why it's necessary
 
-### Part 4: Supervised Fine-Tuning (20 points)
+### Part 6: Supervised Fine-Tuning (25 points)
 - Training configuration summary
 - Training loss curve (screenshot)
 - **Answer the question**: What is the role of `tokenizer.apply_chat_template()` in the SFT pipeline? How does it format conversations?
 
-### Part 5: IFEval Evaluation & Tuning (35 points)
+### Part 7: IFEval Evaluation & Tuning (35 points)
 - Comparison table (before/after SFT metrics)
 - Final strict accuracy (must be > 22%)
 - Hyperparameter tuning summary with results table
@@ -401,6 +460,7 @@ Submit a zip of the codebase (only the homework directory) and a PDF report to C
 
 ### Code Submission
 - Include your implemented `conversation_func.py`
+- Include your implemented `reverse_conversation_func.py`
 - Include your implemented `loss_functions.py`
 - Include any modifications to `scripts/sft.sh`
 - Do NOT include model checkpoints or cache files
@@ -411,17 +471,21 @@ Submit a zip of the codebase (only the homework directory) and a PDF report to C
 # Setup
 bash setup.sh
 
-# Validate loss masking
-bash scripts/check_exercises_1.sh  # Single-turn
-bash scripts/check_exercises_2.sh  # Multi-turn
+# Validate loss masking (Parts 1 & 2)
+bash scripts/check_exercises_1.sh  # Part 1: Single-turn
+bash scripts/check_exercises_2.sh  # Part 2: Multi-turn
 
-# Validate loss function
+# Validate reverse loss masking (Parts 3 & 4)
+bash scripts/check_exercises_3.sh  # Part 3: Single-turn reverse
+bash scripts/check_exercises_4.sh  # Part 4: Multi-turn reverse
+
+# Validate loss function (Part 5)
 python loss_functions_checker.py
 
-# Training
+# Training (Part 6)
 bash scripts/sft.sh
 
-# Evaluation
+# Evaluation (Part 7)
 cd ifeval
 bash run.sh SmolLM2-135M results/base
 bash run.sh /path/to/checkpoint results/finetuned
@@ -431,26 +495,31 @@ bash run.sh /path/to/checkpoint results/finetuned
 
 ```
 .
-├── conversation_func.py          # TODO: implement loss masking logic
-├── loss_functions.py             # TODO: implement cross-entropy loss
-├── loss_functions_checker.py     # Validation script for loss function
-├── train_hw_parallel.py          # Main training script with DeepSpeed
-├── utils.py                      # Helper functions
-├── setup.sh                      # Environment setup
-├── requirements.txt              # Dependencies
-├── exercise_samples.json         # Test cases for loss masking
-├── exercise_solutions.json       # Golden answers for loss masking
-├── reference_answers.pkl         # Reference answers for loss function
+├── conversation_func.py              # TODO: implement loss masking logic (Parts 1 & 2)
+├── reverse_conversation_func.py      # TODO: implement reverse loss masking (Parts 3 & 4)
+├── generate_reverse_solutions.py     # Script to generate golden answers for reverse exercises
+├── loss_functions.py                 # TODO: implement cross-entropy loss (Part 5)
+├── loss_functions_checker.py         # Validation script for loss function
+├── train_hw_parallel.py              # Main training script with DeepSpeed (Part 6)
+├── utils.py                          # Helper functions
+├── setup.sh                          # Environment setup
+├── requirements.txt                  # Dependencies
+├── exercise_samples.json             # Test cases for loss masking
+├── exercise_solutions.json           # Golden answers for normal loss masking
+├── reverse_exercise_solutions.json   # Golden answers for reverse loss masking
+├── reference_answers.pkl             # Reference answers for loss function
 ├── scripts/
-│   ├── sft.sh                   # Training launch script
-│   ├── check_exercises_1.sh     # Single-turn validation
-│   └── check_exercises_2.sh     # Multi-turn validation
-├── ds_configs/                   # DeepSpeed configurations
-├── ifeval/                       # Instruction-following evaluation
-│   ├── run.sh                   # Evaluation script
-│   └── run_ifeval.py            # Main evaluation logic
-├── SmolLM2-135M/                # Base model (downloaded)
-└── smol-smoltalk-6k.json        # Training dataset (downloaded)
+│   ├── sft.sh                       # Training launch script
+│   ├── check_exercises_1.sh         # Part 1: Single-turn validation
+│   ├── check_exercises_2.sh         # Part 2: Multi-turn validation
+│   ├── check_exercises_3.sh         # Part 3: Single-turn reverse validation
+│   └── check_exercises_4.sh         # Part 4: Multi-turn reverse validation
+├── ds_configs/                       # DeepSpeed configurations
+├── ifeval/                           # Instruction-following evaluation (Part 7)
+│   ├── run.sh                       # Evaluation script
+│   └── run_ifeval.py                # Main evaluation logic
+├── SmolLM2-135M/                    # Base model (downloaded)
+└── smol-smoltalk-6k.json            # Training dataset (downloaded)
 ```
 
 ## Troubleshooting
@@ -458,36 +527,40 @@ bash run.sh /path/to/checkpoint results/finetuned
 **1. "NotImplementedError: Exercise 1/2"**
 - Complete the TODOs in `conversation_func.py`
 
-**2. "NotImplementedError: Implement token-level cross-entropy"**
+**2. "NotImplementedError: Exercise 3/4"**
+- Complete the TODOs in `reverse_conversation_func.py`
+
+**3. "NotImplementedError: Implement token-level cross-entropy"**
 - Complete the `cross_entropy_loss()` function in `loss_functions.py`
 
-**3. "CUDA out of memory"**
+**4. "CUDA out of memory"**
 - Reduce `BSZPERDEV` or `--model_max_length` in `sft.sh`
 - Use `ds_configs/zero2_offload.json` for CPU offloading
 
-**4. "Validation failed"**
-- Check that you're correctly identifying assistant tokens using `prefix_lengths`
+**5. "Validation failed"**
+- Check that you're correctly identifying assistant/user tokens using `prefix_lengths`
 - Ensure `IGNORE_TOKEN_ID` is used for masked positions
+- For reverse masking (Parts 3 & 4), ensure you're masking assistant turns instead of user turns
 
-**5. Training loss is not decreasing**
+**6. Training loss is not decreasing**
 - Increase learning rate (try 2e-5 or 5e-5)
 - Increase number of epochs
 - Check that loss function is implemented correctly
 
-**6. IFEval score is below 22%**
+**7. IFEval score is below 22%**
 - Try different learning rates (1e-5 to 5e-5)
 - Try more epochs (4-5 epochs)
 - Try different batch sizes
 - Check your loss masking implementation
 - Ensure training loss is decreasing properly
 
-**7. Training is very slow**
+**8. Training is very slow**
 - Increase `BSZPERDEV` if GPU memory allows
 - Reduce `--model_max_length` to process sequences faster
 - Enable Flash Attention in `sft.sh` if supported
 - Use multiple GPUs if available
 
-**8. Loss function checker fails**
+**9. Loss function checker fails**
 - Make sure you're using `F.log_softmax()` for numerical stability
 - Check that you're handling the causal shift correctly (logits[i] predicts labels[i+1])
 - Verify you're masking positions where `labels == -100`

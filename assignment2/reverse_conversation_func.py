@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 """
-Homework helper functions for building loss masks from conversations.
+Homework helper functions for building REVERSE loss masks from conversations.
 
-Students implement `conversation_to_features` below, and can run this module
-directly to inspect the features produced for the prepared exercise samples.
+In this exercise, students implement the OPPOSITE masking strategy:
+- MASK assistant turns (set labels to IGNORE_TOKEN_ID)
+- KEEP user turns for loss calculation
+
+This tests understanding of the masking mechanism by requiring students to
+reverse the logic from conversation_func.py.
 """
 
 from __future__ import annotations
@@ -28,14 +32,74 @@ DEFAULT_TRUNCATION = "right"
 DEFAULT_SAMPLES_PATH = Path("exercise_samples.json")
 
 
-def conversation_to_features(
+def reverse_conversation_to_features(
     messages: List[Dict[str, str]],
     tokenizer: PreTrainedTokenizer,
     max_length: int,
     truncation: str,
 ) -> Optional[Dict[str, torch.Tensor]]:
+    """
+    Convert a conversation to training features with REVERSE loss masking.
+
+    This function implements two different reverse masking strategies:
+
+    1. Single-turn (Part 3):
+       - SWAP message ORDER - put assistant message first, user message second
+       - Original: [user: "What is Python?"] [assistant: "Python is a language"]
+       - After reorder: [assistant: "Python is a language"] [user: "What is Python?"]
+       - MASK assistant message (now in first position)
+       - KEEP user message (now in second position) for loss calculation
+
+    2. Multi-turn (Part 4):
+       - KEEP original message order
+       - ADD system message if not present: "You are a good state predictor"
+       - MASK assistant turns and system message
+       - KEEP user turns for loss calculation
+
+    Args:
+        messages: List of message dictionaries with 'role' and 'content' keys
+        tokenizer: The tokenizer to use for encoding
+        max_length: Maximum sequence length
+        truncation: Truncation direction ('left' or 'right')
+
+    Returns:
+        Dictionary with 'input_ids', 'labels', and 'attention_mask' tensors,
+        or None if the conversation cannot be processed
+    """
     if not messages:
         return None
+
+    # Make a copy to avoid modifying the original
+    messages = [msg.copy() for msg in messages]
+
+    # Preprocessing based on conversation type
+    if is_single_turn_conversation(messages):
+        # Part 3: Swap message ORDER - put assistant first, user second
+        # Find user and assistant messages and their indices
+        user_idx = None
+        assistant_idx = None
+        system_msg = None
+
+        for idx, msg in enumerate(messages):
+            if msg["role"] == "system":
+                system_msg = msg
+            elif msg["role"] == "user":
+                user_idx = idx
+            elif msg["role"] == "assistant":
+                assistant_idx = idx
+
+        # Reorder: [system (if exists)] [assistant] [user]
+        if user_idx is not None and assistant_idx is not None:
+            new_messages = []
+            if system_msg is not None:
+                new_messages.append(system_msg)
+            new_messages.append(messages[assistant_idx])  # assistant first
+            new_messages.append(messages[user_idx])       # user second
+            messages = new_messages
+    else:
+        # Part 4: Add system message if not present for multi-turn state prediction
+        if not messages or messages[0]["role"] != "system":
+            messages = [{"role": "system", "content": "You are a good state predictor."}] + messages
 
     try:
         full_ids = tokenizer.apply_chat_template(
@@ -61,58 +125,68 @@ def conversation_to_features(
             partial = partial.tolist()
         prefix_lengths.append(len(partial))
 
-    # Please implement from here
     # Start with everything masked out; fill tokens as needed per exercise.
     labels = [IGNORE_TOKEN_ID] * len(full_ids)
     attention = [1] * len(full_ids)
 
     if is_single_turn_conversation(messages):
         # ------------------------------------------------------------------
-        # Exercise 1: Single-turn loss mask
+        # Exercise 3: Single-turn Reverse Loss Masking
+        #
+        # NOTE: At this point, message ORDER has been SWAPPED!
+        # Original: [user: "..."] [assistant: "..."]
+        #           position 1    position 2
+        #
+        # Now:      [assistant: "..."] [user: "..."]
+        #           position 1          position 2
         #
         # Goal:
-        #   Fill `labels` so that only the assistant response contributes to
-        #   the loss for conversations containing exactly one system message
-        #   (optional), one user message, and one assistant message.
+        #   Fill `labels` so that only the USER message (now in position 2)
+        #   contributes to the loss.
         #
         # Requirements:
-        #   1. Leave system and user tokens masked out (i.e. keep
-        #      IGNORE_TOKEN_ID) while copying the assistant tokens into
-        #      `labels`.
-        #   2. Use `full_ids` (the tokenized whole conversation) and
-        #      `prefix_lengths` (cumulative token counts per message) to find
-        #      the span that corresponds to the assistant.
-        #   3. Assume the input fits within the max length (no truncation yet).
+        #   1. MASK assistant message tokens (position 1)
+        #   2. KEEP user message tokens (position 2) for loss calculation
+        #   3. Use `full_ids` and `prefix_lengths` to identify message spans
+        #   4. Assume the input fits within the max length (no truncation yet).
         #
         # Hints:
-        #   - `messages` is the normalized chat history in order.
-        #   - `prefix_lengths[i]` gives the token count up through
-        #     `messages[i]`.
+        #   - After reordering, find the "user" role span (now in position 2)
+        #   - This is the OPPOSITE of Exercise 1 (unmask user instead of assistant)
+        #   - `prefix_lengths[i]` gives the token count up through `messages[i]`
         #
-        raise NotImplementedError("Exercise 1: implement the single-turn loss mask.")
+        # TODO: Implement Exercise 3 here
+        raise NotImplementedError(
+            "Exercise 3: Please implement single-turn reverse loss masking"
+        )
     else:
         # ------------------------------------------------------------------
-        # Exercise 2: Multi-turn loss mask
+        # Exercise 4: Multi-turn Reverse Loss Masking
+        #
+        # NOTE: Message order is NOT changed for multi-turn!
+        # A system message "You are a good state predictor." has been added.
+        # Original: [user: ...] [assistant: ...] [user: ...] [assistant: ...] ...
+        # Now: [system: "You are a good state predictor."] [user: ...] [assistant: ...] ...
         #
         # Goal:
-        #   Generalize your Exercise 1 logic to support multi-round
-        #   conversations. Only assistant utterances should contribute to the
-        #   loss; system and user turns should remain masked.
+        #   Fill `labels` so that only USER turns contribute to the loss.
         #
         # Requirements:
-        #   1. Support an arbitrary number of (user, assistant) turns that may
-        #      be preceded by optional system messages.
-        #   2. Handle truncated conversations where `prefix_lengths` may
-        #      overshoot `len(full_ids)` (use `min` to stay in bounds).
-        #   3. Leave tokens masked (IGNORE_TOKEN_ID) if they should not
-        #      contribute to the loss.
+        #   1. MASK system and assistant role tokens
+        #   2. KEEP user role tokens for loss calculation
+        #   3. Support arbitrary number of (user, assistant) turns
+        #   4. Handle truncation: `prefix_lengths` may exceed `len(full_ids)`
+        #      (use `min` to stay in bounds)
         #
         # Hints:
-        #   - Reuse or extend the helper logic you wrote for Exercise 1.
-        #   - The code that follows assumes `labels` already reflect your
-        #     masking decisions.
+        #   - Similar to Exercise 2, but mask assistant instead of user
+        #   - Iterate through messages and unmask only "user" roles
+        #   - The system message provides context for the first user turn
         #
-        raise NotImplementedError("Exercise 2: extend the loss mask to multi-turn conversations.")
+        # TODO: Implement Exercise 4 here
+        raise NotImplementedError(
+            "Exercise 4: Please implement multi-turn reverse loss masking"
+        )
 
     if len(full_ids) > max_length:
         if truncation == "left":
@@ -170,7 +244,7 @@ def _serialize_features(entry: Dict[str, torch.Tensor]) -> Dict[str, List[int]]:
 def _load_golden(path: Path) -> Dict[str, Dict]:
     if not path.exists():
         raise FileNotFoundError(
-            f"Golden answer file {path} not found. Run generate_golden_answers.py first."
+            f"Golden answer file {path} not found. Run generate_reverse_solutions.py first."
         )
     data = json.loads(path.read_text())
     mapping = {}
@@ -203,7 +277,7 @@ def _compare_features(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate conversation_to_features against golden answers."
+        description="Validate reverse_conversation_to_features against golden answers."
     )
     parser.add_argument(
         "--samples",
@@ -214,8 +288,8 @@ def main() -> int:
     parser.add_argument(
         "--golden",
         type=Path,
-        default=Path("exercise_solutions.json"),
-        help="Path to exercise_solutions.json (golden answers).",
+        default=Path("reverse_exercise_solutions.json"),
+        help="Path to reverse_exercise_solutions.json (golden answers).",
     )
     parser.add_argument(
         "--model-name",
@@ -268,7 +342,7 @@ def main() -> int:
         for entry in sample_data.get(split_name, []):
             messages = entry["messages"]
             try:
-                features = conversation_to_features(
+                features = reverse_conversation_to_features(
                     messages,
                     tokenizer,
                     args.model_max_length,
@@ -276,13 +350,13 @@ def main() -> int:
                 )
             except NotImplementedError as exc:
                 print(
-                    f"{exc}. Complete conversation_to_features before running this script."
+                    f"{exc}. Complete reverse_conversation_to_features before running this script."
                 )
                 return 1
 
             if features is None:
                 raise RuntimeError(
-                    f"conversation_to_features returned None for sample id={entry.get('id')}."
+                    f"reverse_conversation_to_features returned None for sample id={entry.get('id')}."
                 )
 
             payload[split_name].append(

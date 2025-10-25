@@ -18,3 +18,4 @@ llama_training/test
 llama_training/dev
 wandb
 checkpoints
+assignment2/generate_reverse_solutions.py
