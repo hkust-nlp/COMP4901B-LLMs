@@ -89,7 +89,16 @@ def conversation_to_features(
         #   - `prefix_lengths[i]` gives the token count up through
         #     `messages[i]`.
         #
-        raise NotImplementedError("Exercise 1: implement the single-turn loss mask.")
+        labels = [IGNORE_TOKEN_ID]*len(full_ids)
+        attention = [1]*len(full_ids)
+
+        for i, message in enumerate(messages):
+            if message["role"] != "assistant":
+                continue
+            else:
+                start = prefix_lengths[i-1] if i>0 else 0
+                end = prefix_lengths[i]
+                labels[start:end] = full_ids[start:end]
     else:
         # ------------------------------------------------------------------
         # Exercise 2: Multi-turn loss mask
