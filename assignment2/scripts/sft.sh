@@ -23,7 +23,7 @@ python train_hw_parallel.py \
     --per_device_train_batch_size ${BSZPERDEV} \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps ${GRADACC} \
-    --eval_steps 50 \
+    --eval_steps 5 \
     --save_strategy "steps" \
     --save_steps 5 \
     --save_total_limit 2 \
