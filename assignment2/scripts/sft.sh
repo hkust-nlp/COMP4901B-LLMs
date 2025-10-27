@@ -9,7 +9,7 @@ OUTPUTPATH="ckpt"
 DEVICES="0"  # e.g. 0,1,2,3
 NUM_GPUS=1
 TOTALBSZ=256
-BSZPERDEV=2
+BSZPERDEV=1
 GRADACC=$((TOTALBSZ / NUM_GPUS / BSZPERDEV))
 export CUDA_VISIBLE_DEVICES=${DEVICES}
 echo "Training model ${MODEL_SIZE} using ${NUM_GPUS} GPUs, ${BSZPERDEV} batch size per GPU, ${GRADACC} gradient accumulation steps"
