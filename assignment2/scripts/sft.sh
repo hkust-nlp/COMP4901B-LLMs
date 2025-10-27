@@ -1,7 +1,7 @@
 export WANDB_API_KEY="0f2cb2e82161bace177966302bdba87bff2a2f97"
 
 export WANDB_PROJECT="COMP4901B-Homework2"
-RUNNAME="HW2_7"
+RUNNAME="HW2_8"
 MODELPATH="SmolLM2-135M"
 DATAPATH="smol-smoltalk-6k.json"
 MODEL_SIZE="0.6B"
@@ -9,7 +9,7 @@ OUTPUTPATH="ckpt"
 DEVICES="0"  # e.g. 0,1,2,3
 NUM_GPUS=1
 TOTALBSZ=256
-BSZPERDEV=1
+BSZPERDEV=2
 GRADACC=$((TOTALBSZ / NUM_GPUS / BSZPERDEV))
 export CUDA_VISIBLE_DEVICES=${DEVICES}
 echo "Training model ${MODEL_SIZE} using ${NUM_GPUS} GPUs, ${BSZPERDEV} batch size per GPU, ${GRADACC} gradient accumulation steps"
@@ -24,10 +24,10 @@ python train_hw_parallel.py \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps ${GRADACC} \
     --eval_steps 5 \
-    --save_strategy "steps" \
+    --save_strategy "epochs" \
     --save_steps 5 \
-    --save_total_limit 2 \
-    --learning_rate 5e-6 \
+    --save_total_limit 3 \
+    --learning_rate 2e-6 \
     --warmup_ratio 0.1 \
     --lr_scheduler_type "cosine" \
     --logging_steps 1 \
@@ -37,7 +37,7 @@ python train_hw_parallel.py \
     --report_to "wandb" \
     --run_name ${RUNNAME} \
     --bf16 True \
-    --flash_attn False \
+    --flash_attn True\
     --dataloader_num_workers 2 \
     --preprocess_workers 2 \
     --max_rounds 5 
