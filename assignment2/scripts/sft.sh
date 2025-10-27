@@ -37,7 +37,7 @@ python train_hw_parallel.py \
     --report_to "wandb" \
     --run_name ${RUNNAME} \
     --bf16 True \
-    --flash_attn True\
+    --flash_attn False \
     --dataloader_num_workers 2 \
     --preprocess_workers 2 \
     --max_rounds 5 
