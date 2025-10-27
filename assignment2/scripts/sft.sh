@@ -24,7 +24,7 @@ python train_hw_parallel.py \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps ${GRADACC} \
     --eval_steps 5 \
-    --save_strategy "epochs" \
+    --save_strategy "epoch" \
     --save_steps 5 \
     --save_total_limit 3 \
     --learning_rate 2e-6 \
@@ -37,7 +37,7 @@ python train_hw_parallel.py \
     --report_to "wandb" \
     --run_name ${RUNNAME} \
     --bf16 True \
-    --flash_attn False \
+    --flash_attn True\
     --dataloader_num_workers 2 \
     --preprocess_workers 2 \
     --max_rounds 5 
