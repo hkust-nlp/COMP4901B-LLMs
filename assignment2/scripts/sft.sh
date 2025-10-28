@@ -1,7 +1,7 @@
 export WANDB_API_KEY="0f2cb2e82161bace177966302bdba87bff2a2f97"
 
 export WANDB_PROJECT="COMP4901B-Homework2"
-RUNNAME="HW2_12"
+RUNNAME="HW2_13"
 MODELPATH="SmolLM2-135M"
 DATAPATH="smol-smoltalk-6k.json"
 MODEL_SIZE="0.6B"
@@ -27,12 +27,12 @@ python train_hw_parallel.py \
     --save_strategy "epoch" \
     --save_steps 5 \
     --save_total_limit 6 \
-    --learning_rate 2e-6 \
+    --learning_rate 5e-6 \
     --warmup_ratio 0.05 \
-    --lr_scheduler_type "constant" \
+    --lr_scheduler_type "cosine" \
     --logging_steps 1 \
     --do_eval True \
-    --model_max_length 2048 \
+    --model_max_length 3072 \
     --lazy_preprocess True \
     --report_to "wandb" \
     --run_name ${RUNNAME} \
