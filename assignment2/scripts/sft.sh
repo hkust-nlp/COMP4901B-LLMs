@@ -32,7 +32,7 @@ python train_hw_parallel.py \
     --lr_scheduler_type "cosine" \
     --logging_steps 1 \
     --do_eval True \
-    --model_max_length 3072 \
+    --model_max_length 2560 \
     --lazy_preprocess True \
     --report_to "wandb" \
     --run_name ${RUNNAME} \
