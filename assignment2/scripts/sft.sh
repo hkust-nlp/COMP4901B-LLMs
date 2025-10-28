@@ -29,7 +29,7 @@ python train_hw_parallel.py \
     --save_total_limit 6 \
     --learning_rate 1e-5 \
     --warmup_ratio 0.05 \
-    --lr_scheduler_type "cosine" \
+    --lr_scheduler_type "constant" \
     --logging_steps 1 \
     --do_eval True \
     --model_max_length 2048 \
