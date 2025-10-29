@@ -19,7 +19,7 @@ python train_hw_parallel.py \
     --model_name_or_path ${MODELPATH} \
     --data_path ${DATAPATH} \
     --output_dir ${OUTPUTPATH}/${RUNNAME} \
-    --num_train_epochs 1 \
+    --num_train_epochs 2 \
     --per_device_train_batch_size ${BSZPERDEV} \
     --per_device_eval_batch_size 1 \
     --gradient_accumulation_steps ${GRADACC} \
