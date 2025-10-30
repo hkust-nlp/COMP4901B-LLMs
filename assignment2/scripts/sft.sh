@@ -27,7 +27,7 @@ python train_hw_parallel.py \
     --save_strategy "epoch" \
     --save_steps 5 \
     --save_total_limit 6 \
-    --learning_rate 2e-5 \
+    --learning_rate 3e-5 \
     --warmup_ratio 0.05 \
     --lr_scheduler_type "cosine" \
     --logging_steps 1 \
