@@ -8,7 +8,7 @@ MODEL_SIZE="0.6B"
 OUTPUTPATH="ckpt"
 DEVICES="0"  # e.g. 0,1,2,3
 NUM_GPUS=1
-TOTALBSZ=512
+TOTALBSZ=1024
 BSZPERDEV=1
 GRADACC=$((TOTALBSZ / NUM_GPUS / BSZPERDEV))
 export CUDA_VISIBLE_DEVICES=${DEVICES}
@@ -27,7 +27,7 @@ python train_hw_parallel.py \
     --save_strategy "epoch" \
     --save_steps 5 \
     --save_total_limit 6 \
-    --learning_rate 1e-6 \
+    --learning_rate 2e-5 \
     --warmup_ratio 0.05 \
     --lr_scheduler_type "cosine" \
     --logging_steps 1 \
