@@ -89,8 +89,6 @@ def conversation_to_features(
         #   - `prefix_lengths[i]` gives the token count up through
         #     `messages[i]`.
         #
-        labels = [IGNORE_TOKEN_ID]*len(full_ids)
-        attention = [1]*len(full_ids)
 
         for i, message in enumerate(messages):
             if message["role"] == "assistant":
@@ -122,8 +120,6 @@ def conversation_to_features(
         #   - The code that follows assumes `labels` already reflect your
         #     masking decisions.
         #
-        labels = [IGNORE_TOKEN_ID]*len(full_ids)
-        attention = [1]*len(full_ids)
 
         for i, message in enumerate(messages):
             if message["role"] != "assistant":
