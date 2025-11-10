@@ -208,4 +208,8 @@ With this configuration in place, you can now connect directly to the compute no
 ssh uggpu
 ```
 
+<<<<<<< HEAD
 This command will now connect you directly to `ughost01` through `ugcnode01` without prompting for a password. This way, you can directory connect with uggpu using vscode or cursor.
+=======
+This command will now connect you directly to `ughost01` through `ugcnode01` without prompting for a password. This way, you can directory connect with uggpu using vscode or cursor.
+>>>>>>> 846ec3382b0c09ac1adc60e65c032bec5399a431

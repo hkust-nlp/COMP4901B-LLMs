@@ -1,0 +1,14 @@
+# Core Dependencies
+datasets>=2.14.0
+huggingface-hub>=0.19.0
+
+# LLM API client (OpenAI-compatible)
+openai>=1.0.0
+
+# For local model inference with OpenAI-compatible API (optional)
+# vllm>=0.3.0
+# ollama (via pip install ollama)
+
+# Utilities
+tqdm>=4.65.0
+requests>=2.28.0
