@@ -608,6 +608,7 @@ def train():
         else:
             raise
     model.config.use_cache = False
+    #  ------newly added------
     model.model.embed_tokens.weight.requires_grad_(False)
 
     lora_manager = LoRAAdapterManager(
@@ -618,6 +619,7 @@ def train():
     )
     model = lora_manager.apply_adapters()
 
+    #  ------newly added------
     if training_args.gradient_checkpointing:
         model.enable_input_require_grads()
         if hasattr(model, "gradient_checkpointing_enable"):
