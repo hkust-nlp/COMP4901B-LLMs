@@ -141,7 +141,7 @@ def extract_solution(solution_str: str) -> Optional[str]:
     if boxed_match:
         extracted_solution = boxed_match[-1]
     else:
-        number_matches = re.findall(r'(\-?[0-9\.\,]+)', solution_str)
+        number_matches = re.findall(r'(\-?[0-9\.\,]*[0-9]+[0-9\.\,]*)', solution_str)
         if number_matches:
             extracted_solution = number_matches[-1] 
 
