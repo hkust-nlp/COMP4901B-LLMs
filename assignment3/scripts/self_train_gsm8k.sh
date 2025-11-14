@@ -2,6 +2,9 @@
 
 # GSM8K Self-Improving Training Pipeline
 # Usage: bash self_train_gsm8k.sh <initial_model_path> [options]
+export WANDB_API_KEY="0f2cb2e82161bace177966302bdba87bff2a2f97" 
+export WANDB_PROJECT="COMP4901B-Homework3"
+export CUDA_VISIBLE_DEVICES="0"
 
 set -e  # Exit on error
 
@@ -61,14 +64,14 @@ TOP_K=-1
 N_ROLLOUTS=8
 TENSOR_PARALLEL=1
 #  ------modified, default 0.8------
-GPU_MEMORY_UTIL=0.7
+GPU_MEMORY_UTIL=0.65
 SYSTEM_MESSAGE=""
 USE_FEW_SHOT=false
 NO_CHAT_TEMPLATE=false
 ENABLE_THINKING=false
 SPLIT="train"
 #  ------modified, default 2000------
-N_QUERIES=10
+N_QUERIES=2000
 
 # Training parameters
 LEARNING_RATE=2e-5
@@ -261,6 +264,10 @@ for ((iter=0; iter<NUM_ITERATIONS; iter++)); do
     echo "[Step 1/4] Running inference..." | tee -a "$MAIN_LOG" "$ITER_LOG"
     echo "Output: $INFERENCE_OUTPUT" | tee -a "$MAIN_LOG" "$ITER_LOG"
     echo "" | tee -a "$MAIN_LOG" "$ITER_LOG"
+
+    # ------ Clear CUDA cache before inference ------
+    echo "Clearing CUDA cache before VLLM inference..." | tee -a "$ITER_LOG"
+    python -c "import torch; torch.cuda.empty_cache()" 2>&1 | tee -a "$ITER_LOG"
 
     INFERENCE_CMD="python inference_vllm.py \
         --model_path \"$CURRENT_MODEL_PATH\" \
