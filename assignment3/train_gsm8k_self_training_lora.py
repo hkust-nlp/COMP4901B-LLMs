@@ -423,6 +423,9 @@ class LoRAAdapterManager:
         #
         # Hint: Look at the imports at the top of this file
         # =======================================================================
+        self.model = get_peft_model(self.model, lora_config)
+        
+        self.model.print_trainable_parameters()
 
         return self.model
 
@@ -459,9 +462,36 @@ class LoRAAdapterManager:
             List of module names to apply LoRA to (e.g., ["q_proj", "k_proj", "v_proj"])
         """
         # ==================== TODO: Implement this method ====================
+        linear_layer_names = set()
+        for name, module in self.model.named_modules():
+            if isinstance(module, nn.Linear):
+                layer_name = name.split(".")[-1]
+                linear_layer_names.add(layer_name)
+        rank0_print(f"Found linear layers: {linear_layer_names}")
+        
+        if self.lora_args.lora_target_modules:
+            target_modules = [
+                name.strip() for name in self.lora_args.lora_target_modules.split(",")
+            ]
+            rank0_print(f"Using user-specified LoRA target modules: {target_modules}")
+        else:
+            model_type = self.model.config.model_type().lower()
+            rank0_print(f"Detected model type: {model_type}")
+            target_modules = []
+            if "llama" in model_type or "mistral" in model_type or "qwen" in model_type:
+                target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+            elif "opt" in model_type:   
+                target_modules = ["q_proj", "k_proj", "v_proj", "out_proj", "fc1", "fc2"]
+            else:
+                target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "out_proj", "gate_proj", "up_proj", "down_proj", "fc1", "fc2"]
+        
+        valid_targets = [name for name in target_modules if name in linear_layer_names]
+        if not valid_targets:
+            rank0_print("Warning: No valid LoRA target modules found. Falling back to all available linear layers.")
+            valid_targets = list(linear_layer_names)
 
+        rank0_print(f"Final LoRA target modules: {valid_targets}")
         # =====================================================================
-        valid_targets = []  # Replace with your implementation
         return valid_targets
 
 

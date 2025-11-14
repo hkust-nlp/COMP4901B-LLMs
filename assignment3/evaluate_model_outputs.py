@@ -62,8 +62,27 @@ def estimate_pass_at_k(
     #
     # Expected return: numpy array with one pass@k value per problem
     # =======================================================================
-    pass_at_k_values = np.array([0.0])  # Replace this line with your implementation
+    pass_at_k_values = np.zeros(len(num_correct))
+    if isinstance(num_samples, int):
+        num_samples = np.full(len(num_correct), num_samples) 
+    elif isinstance(num_samples, list):
+        num_samples = np.array(num_samples)
+    if isinstance(num_correct, list):
+        num_correct = np.array(num_correct)
+
+    for i in range(len(num_correct)):
+        n = num_samples[i]
+        c = num_correct[i]
+        if n - c < k:
+            pass_at_k_values[i] = 1.0
+        else:
+            prob_all_wrong = 1.0
+            for j in range(1, k+1):
+                prob_all_wrong *= (n - c - k + j) / (n - k + j)
+            pass_at_k_values[i] = 1.0 - prob_all_wrong
     # =======================================================================
+
+
     return pass_at_k_values
 
 def load_jsonl_data(jsonl_path: str):
@@ -116,8 +135,20 @@ def extract_solution(solution_str: str) -> Optional[str]:
     # - For \\boxed{}: r'\\boxed\{([^}]+)\}' captures content inside \boxed{}
     # - For numbers: r'(\-?[0-9\.\,]+)' matches integers, decimals, negative numbers
     # =======================================================================
-    extracted_solution = None  # Replace this line with your implementation
+    extracted_solution = None
+
+    boxed_match = re.findall(r'\\boxed\{([^}]+)\}', solution_str)
+    if boxed_match:
+        extracted_solution = boxed_match[-1]
+    else:
+        number_matches = re.findall(r'(\-?[0-9\.\,]+)', solution_str)
+        if number_matches:
+            extracted_solution = number_matches[-1] 
+
+    if extracted_solution:
+        extracted_solution = extracted_solution.replace(',', '').replace('$', '').strip()
     # =======================================================================
+
     return extracted_solution
 
 
@@ -146,7 +177,17 @@ def compute_score(solution_str: str, ground_truth: str) -> int:
     #
     # Hint: Some answers might not be valid numbers, handle ValueError gracefully
     # =======================================================================
-    is_correct = 0  # Replace this line with your implementation
+    if answer is None:
+        return 0
+    try:
+        normalized_answer = str(float(answer))
+        normalized_gt = str(float(ground_truth))
+        if normalized_answer == normalized_gt:
+            is_correct = 1
+        else:
+            is_correct = 0
+    except ValueError:
+        is_correct = 0
     # =======================================================================
     return is_correct
 

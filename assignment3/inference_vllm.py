@@ -126,6 +126,30 @@ def format_prompts(
     # Hint: The chat template transforms messages into the model's expected format
     # (e.g., "<|im_start|>user\n{content}<|im_end|>" for Qwen models)
     # =======================================================================
+    if use_few_shot:
+        prompt_template = FEW_SHOT_PROMPT
+    else:
+        prompt_template = ZERO_SHOT_PROMPT
+    for question in questions:
+        formatted_prompt = prompt_template.format(question=question)
+        if use_chat_template and tokenizer is not None:
+            messages = []
+            if system_message:
+                messages.append({"role": "system", "content": system_message})
+            messages.append({"role": "user", "content": formatted_prompt})
+            try:
+                chat_prompt = tokenizer.apply_chat_template(
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=True
+                )
+                formatted_prompts.append(chat_prompt)
+            except Exception as e:
+                logger.warning(f"Chat template not supported by this model/tokenizer: {e}")
+                formatted_prompts.append(formatted_prompt)
+        else:
+            formatted_prompts.append(formatted_prompt)
+
     return formatted_prompts
 
 
@@ -237,7 +261,19 @@ def run_inference(
     # Hint: Check the VLLM documentation for LLM and SamplingParams classes
     # can refer to https://docs.vllm.ai/en/stable/getting_started/quickstart.html
     # =======================================================================
-
+    llm = LLM(
+        model=model_path,
+        tensor_parallel_size=tensor_parallel_size,
+        gpu_memory_utilization=gpu_memory_utilization
+    )
+    sampling_params = SamplingParams(
+        temperature=temperature,
+        top_p=top_p,
+        top_k=top_k,
+        max_tokens=max_tokens,
+        n= n_rollouts
+    )
+    outputs = llm.generate(formatted_prompts, sampling_params)  
 
     # Save results
     logger.info(f"Saving results to {output_path}")
