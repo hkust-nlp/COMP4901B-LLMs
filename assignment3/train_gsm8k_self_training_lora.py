@@ -475,7 +475,7 @@ class LoRAAdapterManager:
             ]
             rank0_print(f"Using user-specified LoRA target modules: {target_modules}")
         else:
-            model_type = self.model.config.model_type().lower()
+            model_type = self.model.config.model_type.lower()
             rank0_print(f"Detected model type: {model_type}")
             target_modules = []
             if "llama" in model_type or "mistral" in model_type or "qwen" in model_type:
@@ -617,6 +617,11 @@ def train():
         local_rank=local_rank,
     )
     model = lora_manager.apply_adapters()
+
+    if training_args.gradient_checkpointing:
+        model.enable_input_require_grads()
+        if hasattr(model, "gradient_checkpointing_enable"):
+            model.gradient_checkpointing_enable()
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
