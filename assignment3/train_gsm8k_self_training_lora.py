@@ -608,6 +608,7 @@ def train():
         else:
             raise
     model.config.use_cache = False
+    model.model.embed_tokens.weight.requires_grad_(False)
 
     lora_manager = LoRAAdapterManager(
         model=model,

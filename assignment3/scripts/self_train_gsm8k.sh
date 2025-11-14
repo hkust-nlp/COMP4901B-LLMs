@@ -66,7 +66,7 @@ USE_FEW_SHOT=false
 NO_CHAT_TEMPLATE=false
 ENABLE_THINKING=false
 SPLIT="train"
-N_QUERIES=2000
+N_QUERIES=20
 
 # Training parameters
 LEARNING_RATE=2e-5
