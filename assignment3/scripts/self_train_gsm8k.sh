@@ -55,7 +55,7 @@ shift
 
 # Default values
 OUTPUT_DIR="ckpt"
-RUN_NAME="first-run"
+RUN_NAME="second-run"
 NUM_ITERATIONS=1
 MAX_TOKENS=512
 TEMPERATURE=1.0
@@ -72,7 +72,7 @@ SPLIT="train"
 N_QUERIES=2000
 
 # Training parameters
-LEARNING_RATE=2e-5
+LEARNING_RATE=1e-5
 TOTAL_BATCH_SIZE=128
 BATCH_SIZE_PER_DEV=1
 NUM_EPOCHS=1
