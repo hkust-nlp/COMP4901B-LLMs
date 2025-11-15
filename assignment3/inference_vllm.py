@@ -141,7 +141,8 @@ def format_prompts(
                 chat_prompt = tokenizer.apply_chat_template(
                     messages,
                     tokenize=False,
-                    add_generation_prompt=True
+                    add_generation_prompt=True,
+                    enable_thinking=enable_thinking
                 )
                 formatted_prompts.append(chat_prompt)
             except Exception as e:
