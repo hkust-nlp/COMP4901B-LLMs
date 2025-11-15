@@ -286,10 +286,11 @@ def run_inference(
             # Iterate through all rollouts for this question
             for rollout_idx, completion in enumerate(output.outputs):
                 # Extract model output based on mode
-                if use_few_shot:
-                    model_output = completion.text.strip().split("\n\n")[0].strip()
-                else:
-                    model_output = completion.text
+                #if use_few_shot:
+                    #model_output = completion.text.strip().split("\n\n")[0].strip()
+                #else:
+                    #model_output = completion.text
+                model_output = completion.text
 
                 result = {
                     "idx": i,  # Original question index
