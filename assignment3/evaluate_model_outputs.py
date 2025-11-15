@@ -137,41 +137,35 @@ def extract_solution(solution_str: str) -> Optional[str]:
     # =======================================================================
     extracted_solution = None
 
-    boxed_match = re.findall(r'\\boxed\{([^}]+)\}', solution_str)
+    solution_str = solution_str.strip().lower()
 
+    boxed_match = re.findall(r'\\boxed\{([^}]+)\}', solution_str, re.DOTALL)
     if boxed_match:
-        extracted_solution = boxed_match[-1]
-    else:
-        solution_str_lower = solution_str.lower()
-        META_PHRASES = [
-            "that seems right", 
-            "i think that's it", 
-            "let me check once more", 
-            "Alternatively",
-        ]
+        extracted_solution = boxed_match[-1].strip().replace(',', '').replace('$', '')
+        return extracted_solution
+    
+    answer_cues = re.findall(
+        r'(?:answer|result).*is\s*(\-?[0-9\.\,]*[0-9]+[0-9\.\,]*)',
+        solution_str,
+        re.IGNORECASE)
+    if answer_cues:
+        extracted_solution = answer_cues[-1].strip().replace(',', '').replace('$', '')
+        return extracted_solution
+    
+    META_PHRASES = ["seems right", "wait, but", "let me check", "</think>"]
+    split_index = len(solution_str)
+    
+    for phrase in META_PHRASES:
+        index = solution_str.find(phrase)
+        if index != -1 and index > split_index:
+            split_index = index
+    search_area = solution_str[:split_index]
+    number_matches = re.findall(r'(\-?[0-9\.\,]*[0-9]+[0-9\.\,]*)', search_area)
+    
+    if number_matches:
+        extracted_solution = number_matches[-1] 
+        return extracted_solution.replace(',', '').replace('$', '').strip()
 
-        split_index = len(solution_str)
-        for phrase in META_PHRASES:
-            index = solution_str_lower.find(phrase)
-            if index != -1 and index < split_index:
-                split_index = index
-        search_area = solution_str[:split_index]
-        
-        final_answer_match = re.findall(
-            r'(?:answer|result).*is\s*(\-?[0-9\.\,]*[0-9]+[0-9\.\,]*)', 
-            search_area, 
-            re.IGNORECASE  
-        )
-        
-        if final_answer_match:
-            extracted_solution = final_answer_match[-1]
-        else:
-            number_matches = re.findall(r'(\-?[0-9\.\,]*[0-9]+[0-9\.\,]*)', search_area)
-            if number_matches:
-                extracted_solution = number_matches[-1] 
-
-    if extracted_solution:
-        extracted_solution = extracted_solution.replace(',', '').replace('$', '').strip()
     # =======================================================================
 
     return extracted_solution
