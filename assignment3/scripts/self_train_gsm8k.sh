@@ -63,14 +63,12 @@ TOP_P=1
 TOP_K=-1
 N_ROLLOUTS=8
 TENSOR_PARALLEL=1
-#  ------modified, default 0.8------
-GPU_MEMORY_UTIL=0.7
+GPU_MEMORY_UTIL=0.8
 SYSTEM_MESSAGE=""
 USE_FEW_SHOT=false
 NO_CHAT_TEMPLATE=false
 ENABLE_THINKING=false
 SPLIT="train"
-#  ------modified, default 2000------
 N_QUERIES=2000
 
 # Training parameters
