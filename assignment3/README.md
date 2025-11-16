@@ -243,17 +243,25 @@ Evaluate your final model and analyze the self-training process.
 cd /path/to/COMP4901B-Homework3
 
 # Evaluate base model
-bash scripts/run_gsm8k_eval.sh \
-    --model_path Qwen3-0.6B  \
-    --output_dir results/baseline
+bash scripts/run_gsm8k_eval.sh Qwen3-0.6B  \
+    --output_dir results/baseline \
+    --temperature 0.6 \
+    --max_tokens 512 \
+    --top_p 0.95 \
+    --top_k 20 \
+    --n_rollouts 1 \
 
 # Evaluate fine-tuned model (replace path with your checkpoint)
-bash scripts/run_gsm8k_eval.sh \
-    --model_path PATH_TO_THE_MERGED_MODLE \
-    --output_dir results/xxxxx
+bash scripts/run_gsm8k_eval.sh PATH_TO_THE_MERGED_MODLE \
+    --output_dir results/baseline \
+    --temperature 0.6 \
+    --max_tokens 512 \
+    --top_p 0.95 \
+    --top_k 20 \
+    --n_rollouts 1 \
 
 # Try multiple rollout evaluation for both base and trained model
-bash run_gsm8k_eval.sh \
+bash scripts/run_gsm8k_eval.sh \
     YOUR_MODEL_PATH \
     --output_dir results/xxxxx \
     --temperature 0.6 \

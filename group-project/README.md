@@ -23,7 +23,7 @@ Unlike typical RAG (Retrieval-Augmented Generation) systems that perform a singl
 
 
 ## General Rules
-1. Each group should have 2 students, not more. In case you feel difficult to find a teammate, you can choose to work alone. You will not be penalized by working alone, but you will not get bonus either, as we aim to bring students to work together on this project.
+1. Each group should have 2-3 students, not more than 3. In case you feel difficult to find a teammate, you can choose to work alone. You will not be penalized by working alone, but you will not get bonus either, as we aim to bring students to work together on this project. **Please sign up to form the group on Canvas [here](https://canvas.ust.hk/courses/64649/groups).**
 2. Different from other regular homework, this project is designed to be more open-ended, thus we don't provide detailed step-by-step codebases for you to only fill in some functions as in other homework. Instead, you need to implement the entire thing from scratch. This gives you more flexibility, and you don't need to stick to any environment setup, as long as the project goals are consistent.  
 3. Following the first point, sometimes we deliberately do not provide detailed instructions on how to use some tools or APIs, instead we provide documentation references for you to grab yourself. Consider this as a necessary skill for LLM projects now and in the future. 
 4. This project doesn't need GPUs, thus you are free to use any CPU-based machine to run your code, such as the Google Colab, the CSE cluster, your own laptop (mac or windows), etc. Particularly, if you are using a windows machine, you may need to make certain adjustments to the environment setup and commands.
@@ -50,7 +50,7 @@ COMP4901B-project/
 
 ## Submission Guidelines
 -  Please indicate the names and IDs of both teammates in the PDF report. Please also indicate the contribution percentage of each teammate in the project at the beginning of the PDF report (e.g., 50% for each teammate). If the contribution of each is around 50%, each of you will get exactly the same score. However, if the contribution deviates far from 50%, we will give different scores.
--  **Only one student in each group needs to submit on Canvas, the other teammates plz don't submit to reduce the teaching staff's grading efforts to categorize submissions**
+-  Please sign up to form the group on Canvas [here](https://canvas.ust.hk/courses/64649/groups), then i think Canvas will automatically manage group submission
 
 You are expected to submit two files:  
 -   The zip file of the entire codebase (plz remove unnecessary outputs files before you zip). Name it as `[your-student-id]-[your-ust-username]-project.zip`  
@@ -158,5 +158,8 @@ PYTHONPATH=. python scripts/grade_with_llm_judge.py \
 1. (15 points) Implement a realistic agent with at least 3 tools. The tools should come from realistic applications from your daily life (rather than implementing some fake tools on your own). The applications can include Google calendar, Google maps, Notion, Slack, Github, Google sheet, etc. Your agent can support the previous google search tool as well, but that search tool does not count towards the 3-tool minimum requirements. **Please think of any realistic workflows that you would do manually and now try to build an agent to do it automatically!**
     > Please screenshot your main implementation logic in the code to include in the PDF report, and explain the core components in the PDF report. Also explain why you choose these tools, what kinda scenarios you are thinking.
 
-2. (15 points) Demonstrate three realistic tasks that you would do manually in reality, and now using your implemented agent to do it automatically. Demonstrate the complete agent trajectories in your report and explain them. Did your agent complete these tasks correctly? If not, what went wrong? Each of these trajectories should be at least **5** steps long using at least 3 different tools. Also, the three tasks should be different, rather than just changing parameters or arguments of the same task (e.g., adding a new event to the calendar vs adding a new event to the calendar with a different time).   
+2. (15 points) Demonstrate three realistic tasks that you would do manually in reality, and now using your implemented agent to do it automatically. Demonstrate the complete agent trajectories in your report and explain them. Did your agent complete these tasks correctly? If not, what went wrong? Each of these trajectories should be at least **5** steps long using at least 3 different tools. Also, the three tasks should be different, rather than just changing parameters or arguments of the same task (e.g., adding a new event to the calendar vs adding a new event to the calendar with a different time).
+
+### Rubrics
+We will grade dependending on the reality and complexity of your tools/tasks. Generally agent demonstratation that actually uses multiple advanced tools to address practical, complex tasks is preferred.
 
