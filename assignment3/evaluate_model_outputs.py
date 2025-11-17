@@ -152,7 +152,7 @@ def extract_solution(solution_str: str) -> Optional[str]:
         extracted_solution = answer_cues[-1].strip().replace(',', '').replace('$', '')
         return extracted_solution
     
-    META_PHRASES = ["seems right", "wait, but", "let me check", "</think>"]
+    META_PHRASES = ["seems right", "wait, but", "let me check"]
     split_index = len(solution_str)
     
     for phrase in META_PHRASES:
