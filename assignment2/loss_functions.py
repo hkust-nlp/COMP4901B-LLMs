@@ -59,4 +59,33 @@ def cross_entropy_loss(
     Returns:
         Scalar tensor representing the mean loss over non-ignored tokens.
     """
-    raise NotImplementedError("Implement token-level cross-entropy using the logits.")
+    # raise NotImplementedError("Implement token-level cross-entropy using the logits.")
+    # Calculate vocab probability by log_softmax
+    logits_prob = F.log_softmax(logits, dim=-1)
+
+    # Correctly shift to align labels and logits
+    sliced_logits_prob = logits_prob[:,:-1,:]
+    sliced_labels = labels[:, 1:]
+
+    # Resize tensor to meet the requirement of F.nll_loss()
+    bs, seqlen, vocab = logits.shape
+    flatten_logits_prob = sliced_logits_prob.contiguous().view(bs*(seqlen-1), vocab)
+    flatten_labels = sliced_labels.contiguous().view(bs*(seqlen-1))
+
+    # Calculate thenegative log likelihood loss
+    per_token_loss = F.nll_loss(
+        flatten_logits_prob,
+        flatten_labels,
+        ignore_index = IGNORE_TOKEN_ID,
+        reduction = "none"
+    )
+
+    total_token_loss = per_token_loss.sum()
+
+    # Calculate adverage loss, handling zero divsion case
+    if num_items_in_batch > 0:
+        adverage_loss = total_token_loss/num_items_in_batch
+    else:
+        adverage_loss = torch.tensor(0.0, device = logits.device)
+
+    return adverage_loss

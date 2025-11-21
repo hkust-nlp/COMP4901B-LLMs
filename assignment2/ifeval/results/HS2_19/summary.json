@@ -1,0 +1,7 @@
+{
+  "response_file": "results/HS2_19/responses_checkpoint-12.jsonl",
+  "strict_accuracy": 0.27,
+  "loose_accuracy": 0.32,
+  "strict_accuracy_percentage": 27.0,
+  "loose_accuracy_percentage": 32.0
+}

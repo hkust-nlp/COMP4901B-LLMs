@@ -1,0 +1,7 @@
+{
+  "response_file": "results/HW2_9_138/responses_checkpoint-138.jsonl",
+  "strict_accuracy": 0.27,
+  "loose_accuracy": 0.31,
+  "strict_accuracy_percentage": 27.0,
+  "loose_accuracy_percentage": 31.0
+}
