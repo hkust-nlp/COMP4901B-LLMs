@@ -1,0 +1,7 @@
+{
+  "response_file": "results/SmolLM2-135M/responses_SmolLM2-135M.jsonl",
+  "strict_accuracy": 0.13,
+  "loose_accuracy": 0.15,
+  "strict_accuracy_percentage": 13.0,
+  "loose_accuracy_percentage": 15.0
+}
