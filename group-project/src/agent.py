@@ -85,7 +85,7 @@ def generate_no_search(question: str, config: Optional[Dict[str, str]] = None, t
     cfg = config or load_config()
     messages: List[Dict[str, Any]] = [
         {"role": "system", "content": BASELINE_SYSTEM_PROMPT},
-        {"role": "user", "content": f"Answer concisely with a factual string when possible.\nQuestion: {question}"},
+        {"role": "user", "content": f"Answer concisely with a short factual string when possible.\nQuestion: {question}"},
     ]
     resp = call_deepseek(messages=messages, config=cfg, temperature=temperature, max_tokens=max_tokens)
     return resp.choices[0].message.content
