@@ -1,0 +1,6 @@
+Task 1:
+run : 
+"uv run python .\src\main.py --mode no_search --dataset .\data\nq_test_100.jsonl --output .\results\predictions_nosearch.jsonl"
+"uv run python .\grade_with_em.py --input .\results\predictions_nosearch.jsonl --output .\results\grading_nosearch_em.json"
+"uv run python .\grade_with_llm_judge.py --input .\results\predictions_nosearch.jsonl --model deepseek-chat --base_url https://api.deepseek.com/v1 --api_key $env:DEEPSEEK_API_KEY --output .\results\grading_nosearch_llm_judge.json"
+

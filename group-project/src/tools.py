@@ -1,4 +1,7 @@
 from typing import Dict, Any
+import requests
+from bs4 import BeautifulSoup
+from utils import load_config
 """
 Tool definitions and execution functions.
 ========================================
@@ -67,14 +70,43 @@ def search_tool(query: str) -> str:
     """
     Search the web using Google Search via Serper API.
     """
-    return None
+    config = load_config()
+    api_key = config.get("SERPER_API_KEY")
+    if not api_key:
+        return "[search] Missing SERPER_API_KEY"
+    try:
+        payload = {"q": query}
+        headers = {"X-API-KEY": api_key, "Content-Type": "application/json"}
+        resp = requests.post("https://google.serper.dev/search", json=payload, headers=headers, timeout=15)
+        if resp.status_code != 200:
+            return f"[search] HTTP {resp.status_code}: {resp.text[:200]}"
+        data = resp.json()
+        organic = data.get("organic", [])
+        lines = []
+        for i, item in enumerate(organic[:5], start=1):
+            title = item.get("title") or ""
+            snippet = item.get("snippet") or ""
+            link = item.get("link") or ""
+            lines.append(f"{i}. {title}\n{snippet}\nURL: {link}")
+        return "\n\n".join(lines) if lines else "[search] No results"
+    except Exception as e:
+        return f"[search] Error: {e}"
 
 
 def browse_tool(url: str) -> str:
     """
     Browse a web page using BeautifulSoup.
     """
-    return None
+    try:
+        resp = requests.get(url, timeout=20)
+        if resp.status_code != 200:
+            return f"[browse] HTTP {resp.status_code}: {resp.text[:200]}"
+        soup = BeautifulSoup(resp.text, "html.parser")
+        paragraphs = [p.get_text(separator=" ", strip=True) for p in soup.find_all("p")]
+        text = "\n\n".join(paragraphs)
+        return text[:5000] if text else "[browse] No textual content"
+    except Exception as e:
+        return f"[browse] Error: {e}"
 
 def answer_tool() -> bool:
     """
