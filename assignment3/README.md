@@ -1,6 +1,6 @@
 # COMP4901B Homework 3 — Self-Improvement for Math Reasoning
 
-**Due Date: Nov 20, 2025, 11:59 PM**
+**Due Date: Dec 5, 2026, 11:59 PM**
 
 **Full score: 100 points.**
 
